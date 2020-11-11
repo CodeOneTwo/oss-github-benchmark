@@ -1,0 +1,24 @@
+@import '../../styles/colors.scss';
+
+$navigation-height: 4rem;
+
+.main-nav {
+    height: $navigation-height;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    background-color: $background;
+    z-index:1;
+}
+nav {
+    height: 100%;
+    display: flex;
+}
+nav>img {
+    max-height: 100%;
+    width: auto;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0.3rem;
+}

@@ -8,18 +8,24 @@ import { NavComponent } from './nav/nav.component';
 
 import { HttpClientModule } from '@angular/common/http';
 import {VisualizationsModule} from './visualizations/visualizations.module';
+import {CommonModule} from '@angular/common';
+import { DimensionSelectorComponent } from './dimension-selector/dimension-selector.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    NavComponent
+    NavComponent,
+    DimensionSelectorComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    VisualizationsModule
+    CommonModule,
+    VisualizationsModule,
+    FormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

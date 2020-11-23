@@ -1,29 +1,37 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {combineLatest, Observable} from 'rxjs';
-import { map } from 'rxjs/operators';
-import {IInstitution} from './interfaces/institution';
+import { HttpClient } from '@angular/common/http';
+import { IInstitution } from './interfaces/institution';
+import * as d3 from 'd3';
+import { shareReplay } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DataService {
 
-  constructor(
-    private http: HttpClient
-  ) { }
+  dimensionOptions = this.http.get('/assets/options.json').pipe(shareReplay(1));
 
-  loadData(): Observable<IData> {
-    return combineLatest(
-      this.http.get<any[]>('/assets/oss-github-benchmark.csv'),
-      this.http.get<IInstitution[]>('/assets/oss-github-benchmark.json'),
-    ).pipe(
-      map(([csvData, jsonData]) => ({ csvData, jsonData}))
-    );
+  constructor(private http: HttpClient) {
   }
+
+  loadData(): Promise<IData> {
+    return Promise.all([
+      d3.csv('/assets/oss-github-benchmark.csv'),
+      this.http
+        .get<IInstitution[]>('/assets/oss-github-benchmark.json')
+        .toPromise(),
+    ]).then(([csvData, jsonData]) => ({ csvData, jsonData }));
+  }
+
 }
 
-interface IData {
+export interface IData {
   jsonData: IInstitution[];
   csvData: any[];
+}
+
+export interface DimensionOption {
+  key: string;
+  friendly_name: string;
+  description: string;
 }

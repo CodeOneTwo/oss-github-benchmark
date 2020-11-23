@@ -1,43 +1,52 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, OnChanges } from '@angular/core';
+import * as d3 from 'd3';
+import { IData, DimensionOption } from 'src/app/data.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-visualization-bubble',
   templateUrl: './bubble.component.html',
   styleUrls: ['./bubble.component.scss'],
 })
-export class BubbleComponent implements OnInit {
+export class BubbleComponent implements OnInit, OnChanges {
   @Input() data: IData;
   @Input() options: {
-    dimension1: string;
-    dimension2: string;
-    dimension3: string;
+    dimension1: DimensionOption;
+    dimension2: DimensionOption;
+    dimension3: DimensionOption;
   };
+  svg: any;
+  text: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+  yscale: d3.ScaleLinear<number, number, never>;
+  yAxis: d3.Axis<d3.AxisDomain>;
+  xscale: d3.ScaleLinear<number, number, never>;
+  xAxis: d3.Axis<d3.AxisDomain>;
+  xAxisGroup: any;
+  yAxisGroup: any;
+  xLabel: any;
+  yLabel: any;
+  g: any;
+  colorScale: d3.ScaleOrdinal<unknown, string, never>;
 
-  constructor() {}
+  constructor(private hostElement: ElementRef) {}
 
   ngOnInit(): void {
-    this.options = {
-      dimension1: state.dimension1,
-      dimension2: state.dimension2,
-      dimension3: state.dimension3,
-    };
-
-    const bound = this.element.getBoundingClientRect();
+    const bound = this.hostElement.nativeElement.getBoundingClientRect();
+    debugger;
     const width = bound.width;
     const height = bound.height - 64 - 40;
     const padding = 70;
 
-    const data = state.csvData;
+    // const data = this.data.csvData;
     // var data = [10, 20, 30];
-    const orgs = [];
-    console.log(data);
+    // console.log(data);
     // data.sort(
     //     (a, b) => parseInt(b.num_members) - parseInt(a.num_members)
     // );
-    const colors = ['green', 'purple', 'yellow'];
+    // const colors = ['green', 'purple', 'yellow'];
 
     this.svg = d3
-      .select(this.element)
+      .select(this.hostElement.nativeElement)
       .append('svg')
       .attr('width', width)
       .attr('height', height);
@@ -50,11 +59,13 @@ export class BubbleComponent implements OnInit {
 
     this.yscale = d3.scaleLinear().range([height - padding, padding]);
 
-    this.yAxis = d3.axisLeft().ticks(5);
+    this.yAxis = d3.axisLeft(this.yscale).ticks(5);
 
     this.xscale = d3.scaleLinear().range([padding, width - padding]);
 
-    this.xAxis = d3.axisBottom().ticks(5);
+    this.xAxis = d3.axisBottom(this.xscale).ticks(5);
+
+    this.colorScale = d3.scaleOrdinal();
 
     this.xAxisGroup = this.svg
       .append('g')
@@ -73,7 +84,6 @@ export class BubbleComponent implements OnInit {
         'translate(' + width / 2 + ' ,' + (height - (1 / 4) * padding) + ')'
       )
       .style('text-anchor', 'middle')
-      .text(this.options.dimension1);
 
     this.yLabel = this.svg
       .append('text')
@@ -81,8 +91,130 @@ export class BubbleComponent implements OnInit {
       .attr('y', padding / 4)
       .attr('x', 0 - height / 2)
       .style('text-anchor', 'middle')
-      .text(this.options.dimension2);
 
-    this.update(state);
+    if (this.data) {
+      this.update();
+    }
+  }
+
+  ngOnChanges() {
+    if (this.svg && this.data && this.options) {
+      this.update();
+    }
+  }
+
+  update() {
+    const bound = this.hostElement.nativeElement.getBoundingClientRect();
+    const width = bound.width;
+    const xDimension = (institution: any) =>
+      parseInt(institution[this.options.dimension1.key], 10);
+    const yDimension = (institution: any) =>
+      parseInt(institution[this.options.dimension2.key], 10);
+    const rDimension = (institution: any) =>
+      parseInt(institution[this.options.dimension3.key], 10);
+    const data = this.data.csvData;
+
+    const sector = (i) => i.sector;
+
+    this.yscale.domain([
+      d3.min(data.map(yDimension)),
+      d3.max(data.map(yDimension)),
+    ]);
+    //
+    // this.yAxis.scale(this.yscale);
+    //
+    this.xscale.domain([
+      d3.min(data.map(xDimension)),
+      d3.max(data.map(xDimension)),
+    ]);
+    //
+    // this.xAxis.scale(this.xscale);
+    // var xscale = d3.scaleBand(data.map(i => i.name), [20, 270]);
+    //
+    this.colorScale.domain(_.uniq(data.map(sector))).range(d3.schemePaired);
+
+    const sizeScale = d3
+      .scaleLinear()
+      .range([4, 30])
+      .domain([d3.min(data.map(rDimension)), d3.max(data.map(rDimension))]);
+
+    this.g = this.svg.selectAll('g circle').data(data);
+
+    this.g
+      .enter()
+      .append('g')
+      .attr('transform', function (d, i) {
+        return 'translate(0,0)';
+      })
+      .append('circle')
+
+      .merge(this.g)
+
+      .attr('cx', (inst, i) => {
+        return this.xscale(xDimension(inst));
+      })
+
+      .attr('cy', (inst, i) => {
+        return this.yscale(yDimension(inst));
+      })
+
+      .attr('r', (inst) => {
+        return sizeScale(rDimension(inst));
+      })
+
+      .attr('svg:title', (inst) => inst.name)
+
+      .attr('fill', (inst, i) => {
+        return this.colorScale(inst.sector);
+      })
+      .on('click', (inst) => {
+        debugger;
+        // this.onselect(inst);
+      })
+      .on('mouseover', (inst) => {
+        const img = eval(inst.avatar)[0];
+        this.text
+          .html(
+            `<img src='${img}' height=25 ><br>
+                    ${inst.name}<br>
+                    Repos: ${yDimension(inst)}<br>
+                    Contributors: ${inst.total_num_contributors}<br>
+                    Members: ${rDimension(inst)}`
+          )
+          .style('display', 'block')
+
+          .style(
+            'top',
+            this.yscale(yDimension(inst)) - sizeScale(rDimension(inst))
+          )
+          //   .transition()
+          //   .duration(200)
+          .style('opacity', 0.8);
+        if (this.xscale(xDimension(inst)) > width / 2) {
+          this.text
+            .style(
+              'right',
+              width -
+                (this.xscale(xDimension(inst)) + sizeScale(rDimension(inst)))
+            )
+            .style('left', undefined);
+        } else {
+          this.text
+            .style(
+              'left',
+              this.xscale(xDimension(inst)) + sizeScale(rDimension(inst))
+            )
+            .style('right', undefined);
+        }
+      })
+      .on('mouseout', () => {
+        this.text.style('opacity', 0).style('display', 'none');
+      });
+
+    this.xAxisGroup.call(this.xAxis);
+
+    this.yAxisGroup.call(this.yAxis);
+    this.xLabel.text(this.options.dimension1.friendly_name);
+    this.yLabel.text(this.options.dimension2.friendly_name);
   }
 }

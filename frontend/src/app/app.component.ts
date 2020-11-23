@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {DataService} from './data.service';
-import {IInstitution} from './interfaces/institution';
+import {DataService, IData} from './data.service';
 
 @Component({
   selector: 'app-root',
@@ -9,16 +8,11 @@ import {IInstitution} from './interfaces/institution';
 })
 export class AppComponent implements OnInit {
   title = 'oss-github-benchmark';
-  data: IInstitution[];
 
   constructor(
-    private dataService: DataService
   ) {
   }
 
   ngOnInit(): void {
-    this.dataService.loadData().subscribe( ({jsonData}) => {
-      this.data = jsonData;
-    });
   }
 }

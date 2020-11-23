@@ -1,37 +1,10 @@
-<div class="main-container">
-  <app-nav></app-nav>
-  <div class="main-content">
-    <aside>
-      <button id="addVisualization">add Visualization</button>
-      <div class="dimensions">
-        <div class="form-g">
-          <label for="dimension1">Dimension 1</label>
-          <select name="dimension1" id="dimension1"></select>
-        </div>
-        <div class="form-g">
-          <label for="dimension2">Dimension 2</label>
-          <select name="dimension2" id="dimension2"></select>
-        </div>
-        <div class="form-g">
-          <label for="dimension3">Dimension 3</label>
-          <select name="dimension3" id="dimension3"></select>
-        </div>
-      </div>
-    </aside>
-    <section id="panel">
-      <div id="viz1" class="viz-panel"></div>
-      <div id="viz2" class="viz-panel"></div>
-      <div id="viz3" class="viz-panel"></div>
-    </section>
-    <main></main>
-  </div>
-
-  <div id="myModal" class="modal">
-    <!-- Modal content -->
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h1>Repositories</h1>
-      <ul id="repoList"></ul>
-    </div>
-  </div>
-</div>
+<aside>
+  <app-dimension-selector [data]="data" [(options)]="options">
+  </app-dimension-selector>
+  <!-- <button id="addVisualization">add Visualization</button> -->
+</aside>
+<main>
+  <app-visualizations *ngIf="data" [options]="options" [data]="data">
+  </app-visualizations>
+</main>
+<router-outlet></router-outlet>

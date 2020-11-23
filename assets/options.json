@@ -1,0 +1,22 @@
+[
+    {
+      "key": "num_orgs",
+      "friendly_name": "Anzahl von Organizationen",
+      "descriptions": "Anzahl von Organizationen"
+    },
+    {
+      "key": "num_repos",
+      "friendly_name": "Number of repos",
+      "descriptions": "This is the number of repository for the selectb"
+    },
+    {
+      "key": "total_num_contributors",
+      "friendly_name": "Anzahl von Repositories",
+      "descriptions": "Anzahl von Repositories"
+    },
+    {
+      "key": "num_members",
+      "friendly_name": "Anzahl Members",
+      "descriptions": "Liste aller User welche Member der Github Organisation sind"
+    }
+]

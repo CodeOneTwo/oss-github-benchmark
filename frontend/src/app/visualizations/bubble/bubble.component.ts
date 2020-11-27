@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, ElementRef, OnChanges } from '@angular/core';
 import * as d3 from 'd3';
 import { IData } from 'src/app/data.service';
-import * as _ from 'lodash';
+import * as _ from 'lodash-es';
 import {Options} from '../options';
 import {Router} from '@angular/router';
 

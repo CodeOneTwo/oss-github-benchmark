@@ -1,0 +1,6 @@
+
+fetch_repositories:
+  script: 'echo test'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
